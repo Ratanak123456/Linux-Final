@@ -34,12 +34,43 @@ delete_user() {
 
 # Function to list users
 list_users() {
-
+    display_header
+    echo -e "${GREEN}System Users${NC}"
+    echo "══════════════════════════════════════"
+    echo -e "${YELLOW}Username\tUID\tGID\tHome Directory\tShell${NC}"
+    echo "────────────────────────────────────────────────────────────"
+    
+    # Get all users with UID >= 1000 (regular users) and UID 0 (root)
+    awk -F: '$3 >= 1000 || $3 == 0 {printf "%-12s\t%-6s\t%-6s\t%-15s\t%s\n", $1, $3, $4, $6, $7}' /etc/passwd
+    
+    echo ""
+    read -p "Press Enter to continue..."
 }
 
 # Function to show user details
 show_user_details() {
-
+    display_header
+    echo -e "${GREEN}User Details${NC}"
+    echo "══════════════════════════════════════"
+    read -p "Enter username: " username
+    
+    if ! id "$username" &>/dev/null; then
+        echo -e "${RED}User $username does not exist!${NC}"
+        read -p "Press Enter to continue..."
+        return
+    fi
+    
+    echo -e "${YELLOW}User Information:${NC}"
+    finger "$username" 2>/dev/null || grep "^$username:" /etc/passwd
+    
+    echo -e "\n${YELLOW}Group Memberships:${NC}"
+    groups "$username"
+    
+    echo -e "\n${YELLOW}Last Login:${NC}"
+    last "$username" | head -5
+    
+    echo ""
+    read -p "Press Enter to continue..."
 }
 
 # User Management Menu
