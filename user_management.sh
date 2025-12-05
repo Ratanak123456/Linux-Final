@@ -19,27 +19,76 @@ display_header() {
 
 # Function to create user
 create_user() {
-
+    display_header
+    read -p "Enter username: " username
+    if id "$username" &>/dev/null; then
+        echo -e "${RED}User $username already exists!${NC}"
+    else
+        read -sp "Enter password: " password
+        echo ""
+        useradd -m -s /bin/bash -p $(openssl passwd -1 "$password") "$username"
+        echo -e "${GREEN}User $username created successfully!${NC}"
+    fi
+    read -p "Press Enter to continue..."
 }
 
 # Function to update user
 update_user() {
-
+    display_header
+    read -p "Enter username to update: " username
+    if id "$username" &>/dev/null; then
+        read -p "Enter new full name: " full_name
+        usermod -c "$full_name" "$username"
+        echo -e "${GREEN}User $username updated successfully!${NC}"
+    else
+        echo -e "${RED}User $username does not exist!${NC}"
+    fi
+    read -p "Press Enter to continue..."
 }
 
 # Function to delete user
 delete_user() {
-
+    display_header
+    read -p "Enter username to delete: " username
+    if id "$username" &>/dev/null; then
+        read -p "Do you want to remove the home directory? (y/n): " remove_home
+        if [[ $remove_home == "y" || $remove_home == "Y" ]]; then
+            userdel -r "$username"
+        else
+            userdel "$username"
+        fi
+        echo -e "${GREEN}User $username deleted successfully!${NC}"
+    else
+        echo -e "${RED}User $username does not exist!${NC}"
+    fi
+    read -p "Press Enter to continue..."
 }
 
 # Function to list users
 list_users() {
-
+    display_header
+    echo -e "${GREEN}System Users:${NC}"
+    echo "══════════════════════════════════════"
+    awk -F: '$3 >= 1000 {print "- " $1 " (UID: " $3 ")"}' /etc/passwd
+    echo ""
+    read -p "Press Enter to continue..."
 }
 
 # Function to show user details
 show_user_details() {
-
+    display_header
+    read -p "Enter username: " username
+    if id "$username" &>/dev/null; then
+        echo -e "${GREEN}User Details for $username:${NC}"
+        echo "══════════════════════════════════════"
+        id "$username"
+        echo ""
+        echo -e "${YELLOW}Home Directory:${NC}"
+        eval echo ~"$username"
+    else
+        echo -e "${RED}User $username does not exist!${NC}"
+    fi
+    read -p "Press Enter to continue..."
 }
 
 # User Management Menu
